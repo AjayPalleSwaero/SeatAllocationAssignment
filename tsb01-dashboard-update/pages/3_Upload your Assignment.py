@@ -2,11 +2,70 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+import re
 
 # Page config
 st.set_page_config(page_title="Seat Allocation Validation", page_icon=":material/verified:", layout="wide")
 
-# Sidebar navigation
+def normalize_col(c: str) -> str:
+    """lowercase and remove non-alphanumerics to compare/match headers."""
+    return re.sub(r'[^a-z0-9]', '', str(c).lower())
+
+# Map common variants/typos to canonical names
+HEADER_SYNONYMS = {
+    # unique id
+    "uniqueid": "uniqueid",
+    "uniquicid": "uniqueid",
+    "unique_id": "uniqueid",
+    "studentid": "uniqueid",
+    "uid": "uniqueid",
+    # college id
+    "collegeid": "collegeid",
+    "collageid": "collegeid",      # common typo
+    "college": "collegeid",
+    # preference number / id / order
+    "prefnumber": "prefnumber",
+    "preferenceid": "prefnumber",
+    "preferenceorder": "prefnumber",
+    "preference": "prefnumber",
+    "pref": "prefnumber",
+    "prefno": "prefnumber",
+    "preference_no": "prefnumber",
+    # gender
+    "gender": "gender",
+    "sex": "gender",
+    # caste
+    "caste": "caste",
+    "cast": "caste",
+    "category": "caste",
+}
+
+REQUIRED = ["uniqueid", "collegeid", "prefnumber", "gender", "caste"]
+
+def canonicalize_headers(df: pd.DataFrame) -> pd.DataFrame:
+    """Rename columns to canonical set using synonyms; returns df with renamed columns."""
+    rename_map = {}
+    for col in df.columns:
+        key = normalize_col(col)
+        canonical = HEADER_SYNONYMS.get(key)  # None if not in synonyms
+        if canonical:
+            rename_map[col] = canonical
+        else:
+            # keep normalized name if it already equals a required one, else keep original
+            norm = key
+            rename_map[col] = norm if norm in REQUIRED else col
+    return df.rename(columns=rename_map)
+
+def ensure_required(df: pd.DataFrame) -> bool:
+    return set(REQUIRED).issubset(set(df.columns))
+
+def clean_values(df: pd.DataFrame) -> pd.DataFrame:
+    """Trim whitespace and ensure string dtype for required columns."""
+    for c in REQUIRED:
+        df[c] = df[c].astype(str).str.strip()
+    return df
+
+# Sidebar (single page)
 page = st.sidebar.radio("Select Page", ["Validate Allocation"], key="main_menu")
 
 # --- Validation Page ---
@@ -14,95 +73,83 @@ if page == "Validate Allocation":
     st.header("✅ Seat Allocation Validation")
 
     st.markdown("""
-     ### 📝 Instructions
-     1. Select your **Group**.  
-     2. Upload your **Completed Assignment File (CSV)**.  
-     3. The system will validate your uploaded file:  
-       - ✅ If the file matches the validation rules → it will display **successful records**.  
-       - ❌ If there are mismatches → it will display the **error records**, and you can correct your data and re-upload until it is successful.  
-     4. Based on your final successful submission, the system will display the **Top 3 Rankers**.  
- 
-     """)
+    ### 📝 Instructions
+    1. Select your **Group**.  
+    2. Upload your **Completed Assignment File (CSV)**.  
+    3. The system validates against backend data:
+       - ✅ If **all rows** in your file exist in validation (on **UniqueID, CollegeID, PrefNumber, Gender, Caste**), it's **successful**.
+       - ❌ Otherwise you'll see unmatched rows and can re-upload after fixing.
+    """)
 
     # --- Step 1: Group selection ---
-    group_name = st.selectbox(
-    "Select Your Group",
-    ["Select Group"] + [f"Group - {i}" for i in range(1, 28)]
-    )
+    group_name = st.selectbox("Select Your Group", ["Select Group"] + [f"Group - {i}" for i in range(1, 28)])
 
     # --- Step 2: File uploader ---
     assignment_file = st.file_uploader("Upload Assignment Completed File (CSV)", type="csv", key="assign_file")
 
     if group_name != "Select Group" and assignment_file:
         try:
-            # Load uploaded assignment file
-            assign_df = pd.read_csv(assignment_file)
-
+            # Load uploaded assignment (treat IDs as strings)
+            assign_df = pd.read_csv(assignment_file, dtype=str)
             # Load backend validation file
-            validation_df = pd.read_csv("./data/validation_file.csv")   # <-- backend validation file
+            validation_df = pd.read_csv("./data/validation_file.csv", dtype=str)
 
-            # Standardize column names
-            assign_df.columns = assign_df.columns.str.strip().str.lower()
-            validation_df.columns = validation_df.columns.str.strip().str.lower()
+            # Canonicalize headers
+            assign_df = canonicalize_headers(assign_df)
+            validation_df = canonicalize_headers(validation_df)
 
-            # Expected headers
-            expected_columns = ["UniqueID", "CollegeID", "PrefNumber", "Gender", "Caste"]
+            # Check required headers
+            if not ensure_required(assign_df):
+                st.error("❌ The data is not correct, please check (Invalid column names in assignment file).")
+                st.caption(f"Detected columns: {list(assign_df.columns)}")
+                st.stop()
+            if not ensure_required(validation_df):
+                st.error("❌ Backend validation file format error (missing required columns).")
+                st.caption(f"Detected columns in validation: {list(validation_df.columns)}")
+                st.stop()
 
-            # --- Step 1: Validate headers ---
-            if list(assign_df.columns) != expected_columns:
-                st.error("❌ The data is not correct, please check (Invalid column names).")
-            elif list(validation_df.columns) != expected_columns:
-                st.error("❌ Backend validation file format error.")
-            else:
-                # --- Step 2: Validate records row-by-row (subset logic) ---
-                merged = assign_df.merge(
-                    validation_df,
-                    how="left",
-                    on=["UniqueID", "CollegeID", "PrefNumber", "Gender", "Caste"],
-                    indicator=True
-                )
+            # Keep only required columns and clean values
+            assign_df = clean_values(assign_df[REQUIRED].copy())
+            validation_df = clean_values(validation_df[REQUIRED].copy())
 
-                unmatched = merged[merged["_merge"] == "left_only"]
-                matched = merged[merged["_merge"] == "both"]
+            # Validate: each assignment row must exist in validation (subset match on all 5 columns)
+            merged = assign_df.merge(
+                validation_df.drop_duplicates(),  # avoid false duplicates
+                how="left",
+                on=REQUIRED,
+                indicator=True
+            )
 
-                if unmatched.empty:
-                    st.success("🎉 The allocated seats is successfully completed!")
-                    st.balloons()
-                    # --- Step 3: Save group name + timestamp ---
-                    log_file = "./data/validation_log.csv"
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    log_entry = pd.DataFrame([[group_name, timestamp]], columns=["Group", "Timestamp"])
+            unmatched = merged[merged["_merge"] == "left_only"].drop(columns=["_merge"])
+            matched_count = len(assign_df) - len(unmatched)
 
-                    if os.path.exists(log_file):
-                        log_entry.to_csv(log_file, mode="a", header=False, index=False)
-                    else:
-                        log_entry.to_csv(log_file, mode="w", header=True, index=False)
+            if unmatched.empty:
+                st.success("🎉 The allocated seats is successfully completed!")
+                st.balloons()
 
-                    st.info(f"📌 Log saved: {group_name} at {timestamp}")
-                    
-                elif matched.shape[0]>1:
-                    st.error("❌ The data is not correct, please check (Some records did not match).")
+                # Save group + timestamp
+                log_file = "./data/validation_log.csv"
+                os.makedirs(os.path.dirname(log_file), exist_ok=True)
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                log_entry = pd.DataFrame([[group_name, timestamp]], columns=["Group", "Timestamp"])
 
-
-
-                    st.write(f"Percentage of total matches { round(matched.shape[0]/assign_df.shape[0]*100, 2)}""")
-                    # Total matched recordss
-                    st.write("Total matched records:")  
-                    st.dataframe(matched.drop(columns=["_merge"]))  
-
-                    # Total Unmatched records
-                    st.write(f"Percentage of total unmatches{ round(unmatched.shape[0]/assign_df.shape[0]*100, 2)}""")
-
-                    st.write("Unmatched records from assignment file:")
-                    st.dataframe(unmatched.drop(columns=["_merge"]))
-
+                if os.path.exists(log_file):
+                    log_entry.to_csv(log_file, mode="a", header=False, index=False)
                 else:
-                    st.error("❌ The data is not correct, please check (Some records did not match).")
-                    st.write("Unmatched records from assignment file:")
-                    st.dataframe(unmatched.drop(columns=["_merge"]))
-                
+                    log_entry.to_csv(log_file, mode="w", header=True, index=False)
+
+                st.info(f"📌 Log saved: {group_name} at {timestamp}")
+
+            else:
+                total = len(assign_df)
+                st.error("❌ The data is not correct, please check (Some records did not match).")
+                st.write(f"Matched: **{matched_count}/{total}**  ({round(matched_count/total*100, 2)}%)")
+                st.write(f"Unmatched: **{len(unmatched)}/{total}**  ({round(len(unmatched)/total*100, 2)}%)")
+                st.write("Unmatched records from assignment file:")
+                st.dataframe(unmatched)
 
         except Exception as e:
             st.error(f"⚠️ Error while processing file: {e}")
+
     elif group_name == "Select Group" and assignment_file:
         st.warning("⚠️ Please select a group before uploading file.")
