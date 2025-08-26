@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
+import os
 
 # Page config
 st.set_page_config(page_title="Seat Allocation Validation", page_icon=":material/verified:", layout="wide")
 
 # Sidebar navigation
-page = st.sidebar.radio("Select Page", ["Download Datasets", "Validate Allocation"], key="main_menu")
+page = st.sidebar.radio("Select Page", ["Validate Allocation"], key="main_menu")
 
 # --- Validation Page ---
 if page == "Validate Allocation":
@@ -33,8 +34,14 @@ if page == "Validate Allocation":
             # Load uploaded assignment file
             assign_df = pd.read_csv(assignment_file)
 
+
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            # Go up one level to project root, then into data folder
+            val_path = os.path.join(os.path.dirname(current_dir), 'data', 'validation_file.csv')
+
+
             # Load backend validation file
-            validation_df = pd.read_csv("./data/validation_file.csv")   # <-- keep validation file in backend
+            validation_df = pd.read_csv(val_path)   # <-- keep validation file in backend
 
             # Standardize column names
             assign_df.columns = assign_df.columns.str.strip().str.lower()
