@@ -14,15 +14,21 @@ if page == "Validate Allocation":
     st.header("✅ Seat Allocation Validation")
 
     st.markdown("""
-    ### Instructions:
-    1. Select your **Group**.  
-    2. Upload your **Assignment Completed File (CSV)**.  
-    3. System will validate against backend Validation Data.  
-    4. If successful → group name & timestamp are saved.  
-    """)
+     ### 📝 Instructions
+     1. Select your **Group**.  
+     2. Upload your **Completed Assignment File (CSV)**.  
+     3. The system will validate your uploaded file:  
+       - ✅ If the file matches the validation rules → it will display **successful records**.  
+       - ❌ If there are mismatches → it will display the **error records**, and you can correct your data and re-upload until it is successful.  
+     4. Based on your final successful submission, the system will display the **Top 3 Rankers**.  
+ 
+     """)
 
     # --- Step 1: Group selection ---
-    group_name = st.selectbox("Select Your Group", ["Select Group", "Group - 1", "Group - 2", "Group - 3", "Group - 4"])
+    group_name = st.selectbox(
+    "Select Your Group",
+    ["Select Group"] + [f"Group - {i}" for i in range(1, 28)]
+    )
 
     # --- Step 2: File uploader ---
     assignment_file = st.file_uploader("Upload Assignment Completed File (CSV)", type="csv", key="assign_file")
@@ -40,7 +46,7 @@ if page == "Validate Allocation":
             validation_df.columns = validation_df.columns.str.strip().str.lower()
 
             # Expected headers
-            expected_columns = ["uniquic id", "collage id", "preference id", "gender", "cast"]
+            expected_columns = ["UniqueID", "CollegeID", "PrefNumber", "Gender", "Caste"]
 
             # --- Step 1: Validate headers ---
             if list(assign_df.columns) != expected_columns:
@@ -52,7 +58,7 @@ if page == "Validate Allocation":
                 merged = assign_df.merge(
                     validation_df,
                     how="left",
-                    on=["uniquic id", "collage id", "preference id", "gender", "cast"],
+                    on=["UniqueID", "CollegeID", "PrefNumber", "Gender", "Caste"],
                     indicator=True
                 )
 

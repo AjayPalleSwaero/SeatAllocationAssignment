@@ -27,24 +27,18 @@ if page == "Download Datasets":
 
     # Project description
     st.markdown("""
-    ### 📘 About the Project  
-    This is the data about the **Seat Allocation for Students**.  
-    You are part of the **Education Board’s Data Science Team**.  
-    Every year, thousands of students apply for admission into colleges after their 10th class (SSC exams).  
-    Admission depends on:
-    - Student’s SSC grades and rank  
-    - Reservation category (GEN, SC, ST, BC, PH)  
-
     ### 📊 Data Descriptions  
-
-    **Student Data**  
-    - `Student_ID` | `Name` | `Gender` | `Phone` | `District` | `Category` | `Rank` | `SSC Grades`  
-
+    Please find below the dataset for the assignment.  
+    It contains student details, preferences, and seat allocation outcomes for analysis.
+    
+   **Student Data**  
+    - `UniqueID` | `Name` | `Gender` | `Caste` | `Rank` 
+                
     **Preference Data**  
-    - `Student_ID` | `Preference_Order` | `College_ID` | `College_Name`  
+    - `CollegeID` | `PrefNumber` | `UniqueID`   
 
-    **Institution Matrix**  
-    - `College_ID` | `College_Name` | `District` | `Seats_GEN` | `Seats_SC` | `Seats_ST` | `Seats_BC` | `Seats_PH`  
+    **Seat Data**  
+    - `CollegeID` | `Institution` | `TOTAL No. of seats` | `TOTAL No. of students admitted` | `No. of students joined in Orphan Quota` | `No. of students Joined in PHC Quota` | `SC` | `SC-CC`| `BC` | `Minority`| `OC` 
     """)
 
     st.divider()  # nice separation line
