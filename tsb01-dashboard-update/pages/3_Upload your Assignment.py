@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import re
 
+
 # Page config
 st.set_page_config(page_title="Seat Allocation Validation", page_icon=":material/verified:", layout="wide")
 
@@ -65,6 +66,7 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
         df[c] = df[c].astype(str).str.strip()
     return df
 
+
 # Sidebar (single page)
 page = st.sidebar.radio("Select Page", ["Validate Allocation"], key="main_menu")
 
@@ -89,10 +91,10 @@ if page == "Validate Allocation":
 
     if group_name != "Select Group" and assignment_file:
         try:
-            # Load uploaded assignment (filename can be anything)
+            # Load uploaded assignment
             assign_df = pd.read_csv(assignment_file, dtype=str)
 
-            # Load backend validation file (this file must exist in ./data)
+            # Load backend validation file
             validation_df = pd.read_csv("./data/validation_file.csv", dtype=str)
 
             # Canonicalize headers
@@ -101,11 +103,11 @@ if page == "Validate Allocation":
 
             # Check required headers
             if not ensure_required(assign_df):
-                st.error("❌ The data is not correct, please check (Invalid column names in assignment file).")
+                st.error("❌ Invalid column names in assignment file.")
                 st.caption(f"Detected columns: {list(assign_df.columns)}")
                 st.stop()
             if not ensure_required(validation_df):
-                st.error("❌ Backend validation file format error (missing required columns).")
+                st.error("❌ Backend validation file format error.")
                 st.caption(f"Detected columns in validation: {list(validation_df.columns)}")
                 st.stop()
 
@@ -113,7 +115,7 @@ if page == "Validate Allocation":
             assign_df = clean_values(assign_df[REQUIRED].copy())
             validation_df = clean_values(validation_df[REQUIRED].copy())
 
-            # Validate: each assignment row must exist in validation (subset match on all 5 columns)
+            # Validate: each assignment row must exist in validation
             merged = assign_df.merge(
                 validation_df.drop_duplicates(),
                 how="left",
@@ -125,9 +127,9 @@ if page == "Validate Allocation":
             matched = merged[merged["_merge"] == "both"].drop(columns=["_merge"])
 
             if unmatched.empty:
-                st.success("🎉 The allocated seats is successfully completed!")
+                st.success("🎉 The allocated seats are successfully completed!")
                 st.balloons()
-             
+
                 # Save group + timestamp
                 log_file = "./data/validation_log.csv"
                 os.makedirs(os.path.dirname(log_file), exist_ok=True)
@@ -143,12 +145,10 @@ if page == "Validate Allocation":
 
             else:
                 total = len(assign_df)
-                st.error("❌ The data is not correct, please check (Some records did not match).")
+                st.error("❌ Some records did not match.")
                 st.write(f"Matched: **{len(matched)}/{total}**  ({round(len(matched)/total*100, 2)}%)")
-                st.write("✅ Matched records:")
                 st.dataframe(matched)
                 st.write(f"Unmatched: **{len(unmatched)}/{total}**  ({round(len(unmatched)/total*100, 2)}%)")
-                st.write("❌ Unmatched records from assignment file:")
                 st.dataframe(unmatched)
 
         except Exception as e:
