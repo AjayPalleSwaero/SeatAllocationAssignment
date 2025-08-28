@@ -93,9 +93,12 @@ if page == "Validate Allocation":
         try:
             # Load uploaded assignment
             assign_df = pd.read_csv(assignment_file, dtype=str)
-
+            # Get the directory of the current script
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+           # Go up one level to project root, then into data folder
+            Validation_file = os.path.join(os.path.dirname(current_dir), 'data', 'validation_file.csv')    
             # Load backend validation file
-            validation_df = pd.read_csv("./data/validation_file.csv", dtype=str)
+            validation_df = pd.read_csv(Validation_file)
 
             # Canonicalize headers
             assign_df = canonicalize_headers(assign_df)
@@ -132,8 +135,8 @@ if page == "Validate Allocation":
                 # Get the directory of the current script
                 current_dir = os.path.dirname(os.path.abspath(__file__))
                 # Go up one level to project root, then into data folder
-                csv_path = os.path.join(os.path.dirname(current_dir), 'data', 'validation_log.csv')
-                log_file = pd.read_csv(csv_path)
+                validation_path = os.path.join(os.path.dirname(current_dir), 'data', 'validation_log.csv')
+                log_file = pd.read_csv(validation_path)
                 # Save group + timestamp
                # log_file = "./data/validation_log.csv"
                 os.makedirs(os.path.dirname(log_file), exist_ok=True)
