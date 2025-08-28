@@ -6,10 +6,17 @@ import os
 # Page config
 st.set_page_config(page_title="Work Risk", page_icon=":material/monitoring:", layout="wide")
 
+
+# Get the directory of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Go up one level to project root, then into data folder
+pref_path = os.path.join(os.path.dirname(current_dir), 'data', 'preference.csv')
+seat_path = os.path.join(os.path.dirname(current_dir), 'data', 'seat.csv')
+stu_path = os.path.join(os.path.dirname(current_dir), 'data', 'students.csv')
 # Example: Load 3 datasets
-pref_df = pd.read_csv("./data/preference.csv")
-Seat_df = pd.read_csv("./data/seat.csv")
-Stud_df = pd.read_csv("./data/students.csv")
+pref_df = pd.read_csv(pref_path)
+Seat_df = pd.read_csv(seat_path)
+Stud_df = pd.read_csv(stu_path)
 
 # Datasets in a dictionary (name → dataframe)
 datasets = {
