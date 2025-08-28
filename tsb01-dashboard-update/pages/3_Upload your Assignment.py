@@ -127,7 +127,7 @@ if page == "Validate Allocation":
             if unmatched.empty:
                 st.success("🎉 The allocated seats is successfully completed!")
                 st.balloons()
-
+             
                 # Save group + timestamp
                 log_file = "./data/validation_log.csv"
                 os.makedirs(os.path.dirname(log_file), exist_ok=True)
