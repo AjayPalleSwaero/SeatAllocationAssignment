@@ -103,12 +103,14 @@ Write a Python program to:
 # Expected Output
 st.subheader("📊 Expected Output Format")
 st.table({
-    "Student_ID": [101, 102, 103],
+    "UniqueID": [101, 102, 103],
     "Name": ["Ramesh", "Sita", "Ravi"],
-    "Category": ["BC", "SC", "OC"],
-    "Rank": [1, 2, 3],
-    "Allotted College": ["College B", "College A", "No College Available"],
-    "Preference_Order_Used": [2, 1, "-"]
+    "Gender": ["Male", "Female", "Male"],
+    "Caste": ["BC", "SC", "OC"],
+    "Rank":[1, 2, 3] ,
+    "CollegeID": [40, 12, 190],
+    "Institution":["Medak", "Aler", "Basara"],
+    "PrefNumber" :[1, 2, 3]
 })
 
 # Process Flow Diagram
