@@ -8,7 +8,7 @@ import re
 st.set_page_config(page_title="Seat Allocation Validation", page_icon=":material/verified:", layout="wide")
 
 def normalize_col(c: str) -> str:
-    """lowercase and remove non-alphanumerics to compare/match headers."""
+    """Lowercase and remove non-alphanumerics to compare/match headers."""
     return re.sub(r'[^a-z0-9]', '', str(c).lower())
 
 # Map common variants/typos to canonical names
@@ -75,7 +75,7 @@ if page == "Validate Allocation":
     st.markdown("""
     ### 📝 Instructions
     1. Select your **Group**.  
-    2. Upload your **Completed Assignment File (CSV)**.  
+    2. Upload your **Completed Assignment File (CSV)** (filename can be anything).  
     3. The system validates against backend data:
        - ✅ If **all rows** in your file exist in validation (on **UniqueID, CollegeID, PrefNumber, Gender, Caste**), it's **successful**.
        - ❌ Otherwise you'll see unmatched rows and can re-upload after fixing.
@@ -89,9 +89,10 @@ if page == "Validate Allocation":
 
     if group_name != "Select Group" and assignment_file:
         try:
-            # Load uploaded assignment (treat IDs as strings)
+            # Load uploaded assignment (filename can be anything)
             assign_df = pd.read_csv(assignment_file, dtype=str)
-            # Load backend validation file
+
+            # Load backend validation file (this file must exist in ./data)
             validation_df = pd.read_csv("./data/validation_file.csv", dtype=str)
 
             # Canonicalize headers
@@ -114,14 +115,14 @@ if page == "Validate Allocation":
 
             # Validate: each assignment row must exist in validation (subset match on all 5 columns)
             merged = assign_df.merge(
-                validation_df.drop_duplicates(),  # avoid false duplicates
+                validation_df.drop_duplicates(),
                 how="left",
                 on=REQUIRED,
                 indicator=True
             )
 
             unmatched = merged[merged["_merge"] == "left_only"].drop(columns=["_merge"])
-            matched_count = len(assign_df) - len(unmatched)
+            matched = merged[merged["_merge"] == "both"].drop(columns=["_merge"])
 
             if unmatched.empty:
                 st.success("🎉 The allocated seats is successfully completed!")
@@ -143,9 +144,11 @@ if page == "Validate Allocation":
             else:
                 total = len(assign_df)
                 st.error("❌ The data is not correct, please check (Some records did not match).")
-                st.write(f"Matched: **{matched_count}/{total}**  ({round(matched_count/total*100, 2)}%)")
+                st.write(f"Matched: **{len(matched)}/{total}**  ({round(len(matched)/total*100, 2)}%)")
+                st.write("✅ Matched records:")
+                st.dataframe(matched)
                 st.write(f"Unmatched: **{len(unmatched)}/{total}**  ({round(len(unmatched)/total*100, 2)}%)")
-                st.write("Unmatched records from assignment file:")
+                st.write("❌ Unmatched records from assignment file:")
                 st.dataframe(unmatched)
 
         except Exception as e:

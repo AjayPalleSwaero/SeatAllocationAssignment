@@ -13,9 +13,9 @@ Stud_df = pd.read_csv("./data/students.csv")
 
 # Datasets in a dictionary (name → dataframe)
 datasets = {
-    "Student_Details": pref_df,
-    "Preference_Data": Seat_df,
-    "Institution_Data": Stud_df,
+    "Student_Details": Stud_df,
+    "Preference_Data": pref_df,
+    "Institution_Data": Seat_df,
 }
 
 # Sidebar navigation
