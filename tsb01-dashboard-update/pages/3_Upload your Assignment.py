@@ -4,7 +4,6 @@ from datetime import datetime
 import os
 import re
 
-
 # Page config
 st.set_page_config(page_title="Seat Allocation Validation", page_icon=":material/verified:", layout="wide")
 
@@ -20,10 +19,20 @@ HEADER_SYNONYMS = {
     "unique_id": "uniqueid",
     "studentid": "uniqueid",
     "uid": "uniqueid",
+    # name
+    "name": "name",
+    "fullname": "name",
+    "studentname": "name",
     # college id
     "collegeid": "collegeid",
     "collageid": "collegeid",      # common typo
     "college": "collegeid",
+    # institution
+    "institution": "institution",
+    "college_name": "institution",
+    # rank
+    "rank": "rank",
+    "ranking": "rank",
     # preference number / id / order
     "prefnumber": "prefnumber",
     "preferenceid": "prefnumber",
@@ -41,18 +50,17 @@ HEADER_SYNONYMS = {
     "category": "caste",
 }
 
-REQUIRED = ["uniqueid", "collegeid", "prefnumber", "gender", "caste"]
+REQUIRED = ["uniqueid", "name", "gender", "caste", "rank", "collegeid", "institution", "prefnumber"]
 
 def canonicalize_headers(df: pd.DataFrame) -> pd.DataFrame:
     """Rename columns to canonical set using synonyms; returns df with renamed columns."""
     rename_map = {}
     for col in df.columns:
         key = normalize_col(col)
-        canonical = HEADER_SYNONYMS.get(key)  # None if not in synonyms
+        canonical = HEADER_SYNONYMS.get(key)
         if canonical:
             rename_map[col] = canonical
         else:
-            # keep normalized name if it already equals a required one, else keep original
             norm = key
             rename_map[col] = norm if norm in REQUIRED else col
     return df.rename(columns=rename_map)
@@ -66,7 +74,6 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
         df[c] = df[c].astype(str).str.strip()
     return df
 
-
 # Sidebar (single page)
 page = st.sidebar.radio("Select Page", ["Validate Allocation"], key="main_menu")
 
@@ -77,28 +84,38 @@ if page == "Validate Allocation":
     st.markdown("""
     ### 📝 Instructions
     1. Select your **Group**.  
-    2. Upload your **Completed Assignment File (CSV)** (filename can be anything).  
-    3. The system validates against backend data:
-       - ✅ If **all rows** in your file exist in validation (on **UniqueID, CollegeID, PrefNumber, Gender, Caste**), it's **successful**.
+    2. Upload your **Completed Assignment File (CSV)**.  
+    3. (Optional) Upload your **Python Code File (.py)** for reference.  
+    4. The system validates against backend data:
+       - ✅ If **all rows** in your file exist in validation (on key columns), it's **successful**.
        - ❌ Otherwise you'll see unmatched rows and can re-upload after fixing.
     """)
 
     # --- Step 1: Group selection ---
     group_name = st.selectbox("Select Your Group", ["Select Group"] + [f"Group - {i}" for i in range(1, 28)])
 
-    # --- Step 2: File uploader ---
+    # --- Step 2: File uploader (Assignment CSV) ---
     assignment_file = st.file_uploader("Upload Assignment Completed File (CSV)", type="csv", key="assign_file")
+
+    # --- Step 3: Optional upload (Python code) ---
+    py_file = st.file_uploader("Upload Your Python Code (.py)", type="py", key="code_file")
+    if py_file:
+        st.success(f"✅ Python file `{py_file.name}` uploaded successfully.")
+        code_content = py_file.read().decode("utf-8")
+        with st.expander("📂 View Uploaded Python Code"):
+            st.code(code_content, language="python")
 
     if group_name != "Select Group" and assignment_file:
         try:
             # Load uploaded assignment
             assign_df = pd.read_csv(assignment_file, dtype=str)
+
             # Get the directory of the current script
             current_dir = os.path.dirname(os.path.abspath(__file__))
-           # Go up one level to project root, then into data folder
-            Validation_file = os.path.join(os.path.dirname(current_dir), 'data', 'validation_file.csv')    
+            validation_file = os.path.join(os.path.dirname(current_dir), 'data', 'validation_file.csv')
+
             # Load backend validation file
-            validation_df = pd.read_csv(Validation_file)
+            validation_df = pd.read_csv(validation_file)
 
             # Canonicalize headers
             assign_df = canonicalize_headers(assign_df)
@@ -132,34 +149,35 @@ if page == "Validate Allocation":
             if unmatched.empty:
                 st.success("🎉 The allocated seats are successfully completed!")
                 st.balloons()
-                # Get the directory of the current script
-                current_dir = os.path.dirname(os.path.abspath(__file__))
-                # Go up one level to project root, then into data folder
-                validation_path = os.path.join(os.path.dirname(current_dir), 'data', 'validation_log.csv')
-                log_file = pd.read_csv(validation_path)
-                # Save group + timestamp
-               # log_file = "./data/validation_log.csv"
-                os.makedirs(os.path.dirname(log_file), exist_ok=True)
+
+                # Save log
+                validation_log = os.path.join(os.path.dirname(current_dir), 'data', 'validation_log.csv')
+                os.makedirs(os.path.dirname(validation_log), exist_ok=True)
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 log_entry = pd.DataFrame([[group_name, timestamp]], columns=["Group", "Timestamp"])
 
-                if os.path.exists(log_file):
-                    log_entry.to_csv(log_file, mode="a", header=False, index=False)
+                if os.path.exists(validation_log):
+                    log_entry.to_csv(validation_log, mode="a", header=False, index=False)
                 else:
-                    log_entry.to_csv(log_file, mode="w", header=True, index=False)
+                    log_entry.to_csv(validation_log, mode="w", header=True, index=False)
 
                 st.info(f"📌 Log saved: {group_name} at {timestamp}")
+
+                # Show validated output in expected column order
+                st.subheader("📊 Validated Records")
+                st.dataframe(matched[REQUIRED])
 
             else:
                 total = len(assign_df)
                 st.error("❌ Some records did not match.")
                 st.write(f"Matched: **{len(matched)}/{total}**  ({round(len(matched)/total*100, 2)}%)")
-                st.dataframe(matched)
+                st.dataframe(matched[REQUIRED])
                 st.write(f"Unmatched: **{len(unmatched)}/{total}**  ({round(len(unmatched)/total*100, 2)}%)")
-                st.dataframe(unmatched)
+                st.dataframe(unmatched[REQUIRED])
 
         except Exception as e:
             st.error(f"⚠️ Error while processing file: {e}")
 
     elif group_name == "Select Group" and assignment_file:
         st.warning("⚠️ Please select a group before uploading file.")
+
