@@ -129,9 +129,13 @@ if page == "Validate Allocation":
             if unmatched.empty:
                 st.success("🎉 The allocated seats are successfully completed!")
                 st.balloons()
-
+                # Get the directory of the current script
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                # Go up one level to project root, then into data folder
+                csv_path = os.path.join(os.path.dirname(current_dir), 'data', 'validation_log.csv')
+                log_file = pd.read_csv(csv_path)
                 # Save group + timestamp
-                log_file = "./data/validation_log.csv"
+               # log_file = "./data/validation_log.csv"
                 os.makedirs(os.path.dirname(log_file), exist_ok=True)
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 log_entry = pd.DataFrame([[group_name, timestamp]], columns=["Group", "Timestamp"])
