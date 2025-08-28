@@ -12,13 +12,7 @@ def load_parquet(filepath, nrows=40):
     return pd.read_parquet(filepath)
 
 
-
-# Get the directory of the current script
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# Go up one level to project root, then into data folder
-csv_path = os.path.join(os.path.dirname(current_dir), 'data', 'group_details.csv')
-groups_df = pd.read_csv(csv_path) 
-
+groups_df = pd.read_csv('./data/group_details.csv')
 
 rd_options = [ 'Group Page']
 

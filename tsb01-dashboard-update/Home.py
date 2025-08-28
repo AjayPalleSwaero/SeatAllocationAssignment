@@ -2,118 +2,141 @@ import streamlit as st
 import streamlit as st
 import os
 
-def add_pdf_download_sidebar():
-    """Add PDF download functionality to sidebar"""
-    st.sidebar.markdown("---")  # Add separator line
-    st.sidebar.markdown("### 📄 Download Resources")
-    
-    # Define your PDF files (add your PDF files to a 'pdfs' folder in your project directory)
-    pdf_files = {
-        "Project Documentation": "pdfs/CCDS_HIL_Giz.pdf",
-    }
-    
-    # Create download buttons for each PDF
-    for pdf_name, pdf_path in pdf_files.items():
-        if os.path.exists(pdf_path):
-            with open(pdf_path, "rb") as pdf_file:
-                pdf_data = pdf_file.read()
-                
-                st.sidebar.download_button(
-                    label=f"📥 Download {pdf_name}",
-                    data=pdf_data,
-                    file_name=f"{pdf_name.replace(' ', '_').lower()}.pdf",
-                    mime="application/pdf",
-                    help=f"Click to download {pdf_name}"
-                )
-        else:
-            st.sidebar.error(f"❌ {pdf_name} not found")
-    
-    # Alternative: Single file upload and download
-    st.sidebar.markdown("### 📤 Upload & Share PDF")
-    uploaded_file = st.sidebar.file_uploader(
-        "Upload a PDF to share", 
-        type=['pdf'],
-        help="Upload a PDF file that others can download"
-    )
-    
-    if uploaded_file is not None:
-        st.sidebar.download_button(
-            label="📥 Download Uploaded PDF",
-            data=uploaded_file.read(),
-            file_name=uploaded_file.name,
-            mime="application/pdf"
-        )
-def main():
+# Page config
+st.set_page_config(page_title="Data Science Training Program @ RGUKT Basar", layout="wide")
 
-    st.set_page_config(
-    page_title="Welcome DIU",
-    page_icon=":material/home:"
-    )  
-    # Main page introduction
-    st.title("Welcome to 2nd Batch of Swinfy RGUKT Basara")
-    st.sidebar.success("Select above any project.")
-    add_pdf_download_sidebar()
+# Title
+st.title("📊 Data Science Training Program @ RGUKT Basar")
+st.markdown("### A TANLA Foundation CSR Initiative | Implemented by Swinfy Solutions")
+
+# Introduction
+st.markdown("""
+Imagine walking into a place where you don’t just sit through boring lectures, but actually build apps, 
+train AI models, and solve problems that matter. That’s exactly what this program feels like.  
+
+The **Data Science Training Program at RGUKT Basara**, launched under the CSR initiative of **TANLA Foundation** 
+and implemented by **Swinfy Solutions Pvt Ltd**, is designed to equip students with industry-relevant 
+skills in **Data Science, AI, and Analytics**.
+""")
+
+st.markdown("""
+✨ Here, every project makes you go *“Wow, I never thought I could do this!”*  
+Whether it’s creating a chatbot, designing a smart website, or analyzing real data, you see your ideas come alive.  
+
+At **Swinfy**, learning feels less like studying and more like being part of a mission to use technology to change the world 🌍.  
+
+It’s not about memorizing. It’s about **building, experimenting, breaking things, fixing them again, and celebrating when it finally works**.  
+That *moment of excitement* when your code runs, your app loads, or your AI predicts correctly, is what makes this program special.  
+""")
+
+st.success("Here, you don’t just learn skills – you discover your power to create, innovate, and dream bigger than ever before!")
+
+# Project Assignment
+st.header("🎯 Project Assignment: Student College Allotment System")
+
+st.markdown("""
+You are part of the **Intermediate Education Board’s Team**.  
+Every year, thousands of students apply for admission into colleges after their 10th class (SSC exams).  
+The admission process depends on:
+- Student’s **Rank**  
+- **Reservation category** (SC, SC-CC, ST, BC, Minority, OC)  
+- **Student’s preferred colleges**  
+- **Seat availability** in each institution  
+
+Your task is to **simulate this real admission process** using data and logic.
+""")
+
+# Data Provided
+st.subheader("📂 Data Provided")
+st.markdown("""
+**Students**  
+`UniqueID | Name | Gender | Category | Rank`  
+
+**Preferences**  
+`CollegeID | PrefNumber | UniqueID`  
+
+**Seats**  
+`CollegeID | Institution | Total Seats | Total Admitted | Orphan Quota | PHC Quota | SC | SC-CC | ST | BC | Minority | OC`  
+""")
+
+# Process Flow
+st.subheader("⚙️ Process Flow")
+st.markdown("""
+1. Sort students by rank (**Rank 1 first**)  
+2. For each student, check their 1st preference college  
+3. If a seat is available in their category → **Allot & reduce seat count**  
+4. If not → Move to the **next preference**  
+5. If none of the preferences have a seat → Mark as **No College Available**  
+6. Continue until all students are processed  
+""")
+
+# Example Walkthrough
+st.subheader("📌 Example Walkthrough")
+st.markdown("""
+**Student:** Ramesh (Rank = 1, Category = BC)  
+Preferences: College A → College B → College C  
+
+- College A: No BC seats → ❌ Not allotted  
+- College B: 2 BC seats available → ✅ Allotted  
+- Update College B’s BC seats → Now 1 left  
+
+**Result:** Ramesh → College B (Preference Used = 2)  
+""")
+
+# Tasks
+st.subheader("📝 Your Tasks")
+st.markdown("""
+**Step 1 – Manual Simulation**  
+Do this process manually for the first 10 students. Record results in a table:  
+
+| Student Name | Allotted College | Preference Order Used |  
+
+**Step 2 – Automation with Python**  
+Write a Python program to:  
+- Sort students by rank  
+- Iterate through preferences  
+- Allocate a seat if available  
+- Update seat count  
+- Handle *No college available* cases  
+""")
+
+# Expected Output
+st.subheader("📊 Expected Output Format")
+st.table({
+    "Student_ID": [101, 102, 103],
+    "Name": ["Ramesh", "Sita", "Ravi"],
+    "Category": ["BC", "SC", "OC"],
+    "Rank": [1, 2, 3],
+    "Allotted College": ["College B", "College A", "No College Available"],
+    "Preference_Order_Used": [2, 1, "-"]
+})
+
+# Process Flow Diagram
+st.subheader("🔄 Process Flow Diagram")
+st.code("""
+flowchart TD
+    A[Start with Student List] --> B[Sort Students by Rank]
+    B --> C[Pick Next Student]
+    C --> D[Check 1st Preference College]
+    D --> E{Seat Available in Category?}
+    E -- Yes --> F[Allot College & Update Seats]
+    E -- No --> G[Check Next Preference]
+    G --> E
+    E -- None Left --> H[Mark: No College Available]
+    F --> I[Move to Next Student]
+    H --> I
+    I --> C
+""", language="markdown")
+
+# Learning Outcomes
+st.subheader("🎓 Learning Outcomes")
+st.markdown("""
+- Understand logic behind real admission systems (EAMCET/NEET Counselling)  
+- Practice **data filtering, iteration, dataset updates**  
+- Learn to combine **manual + automation** approaches  
+- Build a **real-world allocation system from scratch**  
+""")
 
 
-
-
-    # Display the context text
-    st.markdown("""
-    ## Overview
-    This dashboard serves as a monitoring to track dashboards built and managed by DIU team for various  projects under departments of 
-    Ministry of Rural Development (MORD). It also provides data crawls status and inflow and out of data through APIs. 
-    ### Projects
-                
-
-    ## 1.  **ABPS Dashboard**: <br>
-    - **Context**:
-        <br>&emsp; Since December 2023 MORD decided all the workers wage payments of NREGA should happen through Aadhaar Payment Bridge System (ABPS). 
-                So DIU built a [dashboard](https://app.powerbi.com/view?r=eyJrIjoiYWI0MWY5NGMtOTY5NS00MDUyLWJjODYtZTlmM2Q3ZTlhN2UyIiwidCI6IjliZjc5NjA5LWU0ZTgtNDdhZC1hYTUzLTI0NjQ2MTg1NTM4YyJ9)  on June 2023 and hosted it in NIC NREGA offical site to enable states, district and blocks officals to know which regions are performing better and worse. The data 
-                for this dashboard gets updated everday morning 7.00 Am. This dashboard gives an overview of crawl status, summary statistics and failed blocks if any   
-        **Metrics**: 
-        - **Summary**: Provides overview crawl status; number of blocks fetched and number of blocks failed 
-        - **Logs**: A detailed log(s) if there are any failed block(s). 
-    ## 2. **Azure Resource Tracker**: <br>
-                
-
-    
-    ## 3. **DOCU AI** <br>
-    - Presents detailed metrics and performance indicators for the DDU-GKY project, helping stakeholders understand the progress and areas needing attention.
-
-    - **Key Features**
-
-        - **Real-Time Tracking**: Continuously updates to provide the most current data on crawls and API calls.
-        - **Error Monitoring**: Highlights failed status and issues, allowing for quick troubleshooting and resolution.
-        - **Data Insights**: Offers detailed analytics and insights through integrated reports and visualizations.
-                
-   ## 4. **Emarg**:  <br> 
-                
-
-
-   ## 5. **Work Risk Dashboard**:  <br> 
-    - **Context**:
-        <br>&emsp; As a part of work-risk analytics project DIU and NIC NREGA implements
-        from NIC then process AI rule and GIS rule and sends back processed data to NIC NREGA by last day of that month. Then 
-        NIC performs remaining rules updates workrisk dashboard and exposes it as API. This dashboard gives glimpse of above process.  
-            
-        **Metrics**:
-    - **Summary**: Provides a high-level overview that month processed and sent records.
-    - **AI Rule**: Provides AI rule key metrics and highlights discrepancy in data received, processed and sent to NIC NREGA, if any.
-    - **GIS Rule**: Provides GIS rule key metrics and highlights discrepancy in data received, processed and sent to NIC NREGA, if any.
-    - **Power Bi Dashboard**: 
-
-    """, unsafe_allow_html=True)
-    st.info("Use the sidebar to navigate through different dashboards and explore various metrics.")
-    st.markdown("## Getting Started")
-    st.markdown("""
-    1. **Navigate**: Use the sidebar to select different dashboards.
-    2. **Explore**: Dive into the metrics and analytics provided for each section.
-    3. **Monitor**: Keep an eye on real-time updates and alerts.
-    """)
-
-
-
-if __name__=='__main__':
-    main()
 
 
