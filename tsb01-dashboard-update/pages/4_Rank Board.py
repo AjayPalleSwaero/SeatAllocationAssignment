@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
+import os
 
 # Page config
 st.set_page_config(page_title="Rankers Board", page_icon=":material/leaderboard:", layout="wide")
@@ -8,12 +10,16 @@ st.set_page_config(page_title="Rankers Board", page_icon=":material/leaderboard:
 st.header("🏆 Rankers Board")
 
 try:
-    # Load validation log & group details
-    log_file = "./data/validation_log.csv"
-    group_file = "./data/Group_details.csv"
+    # Get the directory of the current script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Go up one level to project root, then into data folder
+    validation_path = os.path.join(os.path.dirname(current_dir), 'data', 'validation_log.csv')
+    group_path = os.path.join(os.path.dirname(current_dir), 'data', 'Group_details.csv')
 
-    log_df = pd.read_csv(log_file)
-    group_df = pd.read_csv(group_file)
+    # Load validation log & group details
+    log_df = pd.read_csv(validation_path)
+    group_df = pd.read_csv(group_path)
 
     # Drop completely empty rows
     log_df = log_df.dropna(how="all")
@@ -33,7 +39,7 @@ try:
 
     # Keep earliest submission per group
     earliest_log = (
-        log_df.sort_values("Timestamp", ascending=True)   # <-- ascending for earliest
+        log_df.sort_values("Timestamp", ascending=True)   # earliest = smallest datetime
         .drop_duplicates("Group", keep="first")
     )
 
