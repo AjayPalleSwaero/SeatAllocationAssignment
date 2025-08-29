@@ -1,108 +1,105 @@
-Sno,Group,Names
-1,Group - 1,Devisri Prasad Bommideni
+SNO,Group,Full Name
+1,Group - 23,Aalla Hariprasad
 2,Group - 1,Addekari Manikanta
-3,Group - 1,Bhukya Naveen
-4,Group - 1,Mulkanuri Spurthi
-5,Group - 2,Dharavath Vasantha
-6,Group - 2,Aerpula Madhu
-7,Group - 2,Boini Akhila
-8,Group - 2,Naini Varshitha
-9,Group - 3,Divya Bingi
-10,Group - 3,Ajay Polepally
-11,Group - 3,Boya Manjula
-12,Group - 3,Putta Naresh Kumar
-13,Group - 4,Kurella Sushmitha
-14,Group - 4,Alkapalli Harisha
-15,Group - 4,Chandaboina Ashwini
-16,Group - 4,Kondaboina Ajay Kumar
-17,Group - 5,Muniganti Sindhu Priya
-18,Group - 5,Amudala Ravikiran
-19,Group - 5,Chirra Sanjana
-20,Group - 5,Shiva Kumar Kanakatla
-21,Group - 6,Muniganti Sindhu Priya
-22,Group - 6,Amudala Ravikiran
-23,Group - 6,Chirra Sanjana
-24,Group - 6,Shiva Kumar Kanakatla
-25,Group - 7,Nakka Maneesha
-26,Group - 7,Aravind Induri
-27,Group - 7,Depavath Naresh
-28,Group - 7,Sumanth Kotla
-29,Group -8,Vudugula Madhulatha
-30,Group -8,Azmeera Tharun
-31,Group -8,Dheekonda Rishitha
-32,Group -8,Mallikanti Adithya
-33,Group - 9,S Vinay
-34,Group - 9,Neelagiri Sumanya
-35,Group - 9,Talari Srinivas
-36,Group - 9,Kankala Neha
-37,Group - 10,N Sai Krishna
-38,Group - 10,Panchakoti Sravan Kumar
-39,Group - 10,Thotla Manohar
-40,Group - 10,Kethavath Shirisha
-41,Group - 11,S Pawan Kalyan
-42,Group - 11,Prashanth Dharavath
-43,Group - 11,Vemula Saikrishna
-44,Group - 11,Kodavath Mounika
-45,Group - 12,K RamJi
-46,Group - 12,Ramavath Rajendra Prasad
-47,Group - 12,Venkatesh Samala
-48,Group - 12,Kolekar Tejaswini
-49,Group - 13,K Suresh
-50,Group - 13,Ramavath Srikanth
-51,Group - 13,Yadagiri Gaini
-52,Group - 13,Korra Praveen
-53,Group - 14,V Sai Prakash
-54,Group - 14,Rohith Nakashi
-55,Group - 14,Boda Rajesh
-56,Group - 14,Kothapalli Vijaykumar
-57,Group - 15,P Rajesh
-58,Group - 15,Sai Kumar
-59,Group - 15,G Yogender
-60,Group - 15,Lavudya Mothilal
-61,Group - 16,Muravath Krishna Priya
-62,Group - 16,Bairi Balaji
-63,Group - 16,Gajula Sanjana
-64,Group - 16,Mamidi Vardhan
-65,Group - 17,k.kavya
-66,Group - 17,Bhukya Narsimhaswamy
-67,Group - 17,Gandham Jeshwanth
-68,Group - 17,Miyyapuram Rohith
-69,Group - 18,Kasani Poojitha
-70,Group - 18,V Nikhil
-71,Group - 18,Kamindla Ravicharan
-72,Group - 18,Motam Prashanth
-73,Group - 19,Lavanya
-74,Group - 19,M Manasa
-75,Group - 19,Muppu Kokila
-76,Group - 19,Malavath Rahul
-77,Group - 20,u.sravani
-78,Group - 20,T Akshitha
-79,Group - 20,Naresh Damera
-80,Group - 20,Mohammad Vaseem Akram
-81,Group - 21,Thadem Ravali
-82,Group - 21,Avula Sowmya
-83,Group - 21,Dharavath Ramsingh
-84,Group - 21,Theppa Jyothi
-85,Group - 22,Udutha Raju
-86,Group - 22,Shivakumar Jagadam
-87,Group - 22,P Aishwarya
-88,Group - 22,Mahesh Pittala
-89,Group - 23,B.Mamatha
-90,Group - 23,Sriram Varshini
-91,Group - 23,G Mounika
-92,Group - 23,Aalla Hariprasad
-93,Group - 24,B.Mamatha
-94,Group - 24,Sura Chandu
-95,Group - 24,M Kalyan
-96,Group - 24,Banothu Rajesh
-97,Group - 25,Banothu Santhosh
-98,Group - 25,Chawan Pranith Kumar
-99,Group - 25,Ishwarya Kadavergula
-100,Group - 25,Medapatla Tejaswi
-101,Group - 26,S Vishnu
-102,Group - 26,Saboor Shaik
-103,Group - 26,K Vinay Kumar
-104,Group - 26,Kotrangi Pochanna
-105,Group - 27,Chandhu Karre
-106,Group - 27,Gopishetti Krishnaveni
-107,Group - 27,Madhuri Vadlakonda
+3,Group - 2,Aerpula Madhu
+4,Group - 3,Ajay Polepally
+5,Group - 4,Alkapalli Harisha
+6,Group - 5,Amudala Ravikiran
+7,Group - 7,Aravind Induri
+8,Group - 21,Avula Sowmya
+9,Group -8,Azmeera Tharun
+10,Group - 16,Bairi Balaji
+11,Group - 24,Banothu Rajesh
+12,Group - 25,Banothu Santhosh
+13,Group - 17,Bhukya Narsimhaswamy
+14,Group - 1,Bhukya Naveen
+15,Group - 2,Boini Akhila
+16,Group - 3,Boya Manjula
+17,Group - 4,Chandaboina Ashwini
+18,Group - 27,Chandhu Karre
+19,Group - 25,Chawan Pranith Kumar
+20,Group - 5,Chirra Sanjana
+21,Group - 7,Depavath Naresh
+22,Group - 1,Devisri Prasad Bommideni
+23,Group - 21,Dharavath Ramsingh
+24,Group - 2,Dharavath Vasantha
+25,Group -8,Dheekonda Rishitha
+26,Group - 3,Divya Bingi
+27,Group - 16,Gajula Sanjana
+28,Group - 17,Gandham Jeshwanth
+29,Group - 27,Gopishetti Krishnaveni
+30,Group - 25,Ishwarya Kadavergula
+31,Group - 18,Kamindla Ravicharan
+32,Group - 9,Kankala Neha
+33,Group - 10,Kethavath Shirisha
+34,Group - 11,Kodavath Mounika
+35,Group - 12,Kolekar Tejaswini
+36,Group - 13,Korra Praveen
+37,Group - 14,Kothapalli Vijaykumar
+38,Group - 26,Kotrangi Pochanna
+39,Group - 4,Kurella Sushmitha
+40,Group - 15,Lavudya Mothilal
+41,Group - 27,Madhuri Vadlakonda
+42,Group - 22,Mahesh Pittala
+43,Group - 19,Malavath Rahul
+44,Group -8,Mallikanti Adithya
+45,Group - 16,Mamidi Vardhan
+46,Group - 25,Medapatla Tejaswi
+47,Group - 17,Miyyapuram Rohith
+48,Group - 20,Mohammad Vaseem Akram
+49,Group - 18,Motam Prashanth
+50,Group - 1,Mulkanuri Spurthi
+51,Group - 5,Muniganti Sindhu Priya
+52,Group - 19,Muppu Kokila
+53,Group - 16,Muravath Krishna Priya
+54,Group - 2,Naini Varshitha
+55,Group - 7,Nakka Maneesha
+56,Group - 20,Naresh Damera
+57,Group - 9,Neelagiri Sumanya
+58,Group - 10,Panchakoti Sravan Kumar
+59,Group - 11,Prashanth Dharavath
+60,Group - 3,Putta Naresh Kumar
+61,Group - 4,Kondaboina Ajay Kumar
+62,Group - 12,Ramavath Rajendra Prasad
+63,Group - 13,Ramavath Srikanth
+64,Group - 14,Rohith Nakashi
+65,Group - 26,Saboor Shaik
+66,Group - 15,Sai Kumar
+67,Group - 5,Shiva Kumar Kanakatla
+68,Group - 22,Shivakumar Jagadam
+69,Group - 23,Sriram Varshini
+70,Group - 7,Sumanth Kotla
+71,Group - 24,Sura Chandu
+72,Group - 9,Talari Srinivas
+73,Group - 21,Thadem Ravali
+74,Group - 21,Theppa Jyothi
+75,Group - 10,Thotla Manohar
+76,Group - 11,Vemula Saikrishna
+77,Group - 12,Venkatesh Samala
+78,Group -8,Vudugula Madhulatha
+79,Group - 13,Yadagiri Gaini
+80,Group - 14,Boda Rajesh
+81,Group - 26,K Vinay Kumar
+82,Group - 15,G Yogender
+83,Group - 18,V Nikhil
+84,Group - 22,P Aishwarya
+85,Group - 23,G Mounika
+86,Group - 19,M Manasa
+87,Group - 20,T Akshitha
+88,Group - 24,M Kalyan
+89,Group - 9,S Vinay
+90,Group - 10,N Sai Krishna
+91,Group - 11,S Pawan Kalyan
+92,Group - 12,K RamJi
+93,Group - 13,K Suresh
+94,Group - 14,V Sai Prakash
+95,Group - 26,S Vishnu
+96,Group - 15,P Rajesh
+97,Group - 22,Udutha Raju
+98,Group - 17,k.kavya
+99,Group - 18,Kasani Poojitha
+100,Group - 23,B.Mamatha
+101,Group - 27,Lavanya K
+102,Group - 20,u.sravani
+103,Group - 27,Paisa Rajinikanth
+104,Group - 23,B.Mamatha
