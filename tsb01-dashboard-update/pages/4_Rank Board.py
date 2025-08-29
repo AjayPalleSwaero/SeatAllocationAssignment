@@ -30,8 +30,7 @@ try:
     # Parse timestamp safely
     log_df["Timestamp"] = pd.to_datetime(
         log_df["Timestamp"], 
-        errors="coerce",      
-        infer_datetime_format=True
+        errors="coerce"
     )
 
     # Drop invalid timestamps
@@ -52,10 +51,21 @@ try:
     # Merge with group details
     rankers = top3.merge(group_df, on="Group", how="left")
 
+    # Figure out which column holds member names
+    member_col = None
+    for col in ["Names", "Members", "Full Name", "Students"]:
+        if col in group_df.columns:
+            member_col = col
+            break
+
+    if not member_col:
+        st.error("⚠️ Could not find a column for member names in group_details.csv")
+        st.stop()
+
     # Display rankers with larger Rank size
     st.subheader("🥇 Top 3 Rankers Based on Earliest Uploads")
     for i, (grp, time) in enumerate(zip(top3["Group"], top3["Timestamp"])):
-        members = rankers[rankers["Group"] == grp]["Names"].tolist()
+        members = rankers[rankers["Group"] == grp][member_col].tolist()
         st.markdown(f"""
         <h2 style="color:#2E86C1; font-size:28px;">🏅 Rank {i+1}: {grp}</h2>
         <p><b>⏰ Uploaded at:</b> {time}</p>
