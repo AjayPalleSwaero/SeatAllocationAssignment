@@ -15,7 +15,7 @@ try:
     
     # Go up one level to project root, then into data folder
     validation_path = os.path.join(os.path.dirname(current_dir), 'data', 'validation_log.csv')
-    group_path = os.path.join(os.path.dirname(current_dir), 'data', 'Group_details.csv')
+    group_path = os.path.join(os.path.dirname(current_dir), 'data', 'group_details.csv')
 
     # Load validation log & group details
     log_df = pd.read_csv(validation_path)
