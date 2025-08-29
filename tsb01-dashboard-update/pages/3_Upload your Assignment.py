@@ -13,27 +13,21 @@ def normalize_col(c: str) -> str:
 
 # Map common variants/typos to canonical names
 HEADER_SYNONYMS = {
-    # unique id
     "uniqueid": "uniqueid",
     "uniquicid": "uniqueid",
     "unique_id": "uniqueid",
     "studentid": "uniqueid",
     "uid": "uniqueid",
-    # name
     "name": "name",
     "fullname": "name",
     "studentname": "name",
-    # college id
     "collegeid": "collegeid",
-    "collageid": "collegeid",      # common typo
+    "collageid": "collegeid",
     "college": "collegeid",
-    # institution
     "institution": "institution",
     "college_name": "institution",
-    # rank
     "rank": "rank",
     "ranking": "rank",
-    # preference number / id / order
     "prefnumber": "prefnumber",
     "preferenceid": "prefnumber",
     "preferenceorder": "prefnumber",
@@ -41,10 +35,8 @@ HEADER_SYNONYMS = {
     "pref": "prefnumber",
     "prefno": "prefnumber",
     "preference_no": "prefnumber",
-    # gender
     "gender": "gender",
     "sex": "gender",
-    # caste
     "caste": "caste",
     "cast": "caste",
     "category": "caste",
@@ -74,6 +66,7 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
         df[c] = df[c].astype(str).str.strip()
     return df
 
+
 # Sidebar (single page)
 page = st.sidebar.radio("Select Page", ["Validate Allocation"], key="main_menu")
 
@@ -85,10 +78,10 @@ if page == "Validate Allocation":
     ### 📝 Instructions
     1. Select your **Group**.  
     2. Upload your **Completed Assignment File (CSV)**.  
-    3. (Optional) Upload your **Python Code File (.py)** for reference.  
-    4. The system validates against backend data:
-       - ✅ If **all rows** in your file exist in validation (on key columns), it's **successful**.
-       - ❌ Otherwise you'll see unmatched rows and can re-upload after fixing.
+    3. Upload your **Python Code File (.py)** for reference. 
+    4.REQUIRED fileds "uniqueid", "name", "gender", "caste", "rank", "collegeid", "institution", "prefnumber"    
+    5. Click **Submit** at the bottom to save your files and log.  
+    6. Validation will be done automatically against backend data.
     """)
 
     # --- Step 1: Group selection ---
@@ -105,50 +98,77 @@ if page == "Validate Allocation":
         with st.expander("📂 View Uploaded Python Code"):
             st.code(code_content, language="python")
 
-    if group_name != "Select Group" and assignment_file:
-        try:
-            # Load uploaded assignment
-            assign_df = pd.read_csv(assignment_file, dtype=str)
+    # --- Step 4: Submit button ---
+    if st.button("📥 Submit"):
+        if group_name == "Select Group":
+            st.warning("⚠️ Please select a group before submitting.")
+        elif not assignment_file:
+            st.warning("⚠️ Please upload your assignment CSV before submitting.")
+        else:
+            try:
+                # Load uploaded assignment
+                assign_df = pd.read_csv(assignment_file, dtype=str)
 
-            # Get the directory of the current script
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            validation_file = os.path.join(os.path.dirname(current_dir), 'data', 'validation_file.csv')
+                # Load backend validation file
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                validation_file = os.path.join(os.path.dirname(current_dir), 'data', 'validation_file.csv')
+                validation_df = pd.read_csv(validation_file)
 
-            # Load backend validation file
-            validation_df = pd.read_csv(validation_file)
+                # Canonicalize headers
+                assign_df = canonicalize_headers(assign_df)
+                validation_df = canonicalize_headers(validation_df)
 
-            # Canonicalize headers
-            assign_df = canonicalize_headers(assign_df)
-            validation_df = canonicalize_headers(validation_df)
+                # Check required headers
+                if not ensure_required(assign_df):
+                    st.error("❌ Invalid column names in assignment file.")
+                    st.caption(f"Detected columns: {list(assign_df.columns)}")
+                    st.stop()
+                if not ensure_required(validation_df):
+                    st.error("❌ Backend validation file format error.")
+                    st.caption(f"Detected columns in validation: {list(validation_df.columns)}")
+                    st.stop()
 
-            # Check required headers
-            if not ensure_required(assign_df):
-                st.error("❌ Invalid column names in assignment file.")
-                st.caption(f"Detected columns: {list(assign_df.columns)}")
-                st.stop()
-            if not ensure_required(validation_df):
-                st.error("❌ Backend validation file format error.")
-                st.caption(f"Detected columns in validation: {list(validation_df.columns)}")
-                st.stop()
+                # Keep only required columns and clean values
+                assign_df = clean_values(assign_df[REQUIRED].copy())
+                validation_df = clean_values(validation_df[REQUIRED].copy())
 
-            # Keep only required columns and clean values
-            assign_df = clean_values(assign_df[REQUIRED].copy())
-            validation_df = clean_values(validation_df[REQUIRED].copy())
+                # Validate: each assignment row must exist in validation
+                merged = assign_df.merge(
+                    validation_df.drop_duplicates(),
+                    how="left",
+                    on=REQUIRED,
+                    indicator=True
+                )
 
-            # Validate: each assignment row must exist in validation
-            merged = assign_df.merge(
-                validation_df.drop_duplicates(),
-                how="left",
-                on=REQUIRED,
-                indicator=True
-            )
+                unmatched = merged[merged["_merge"] == "left_only"].drop(columns=["_merge"])
+                matched = merged[merged["_merge"] == "both"].drop(columns=["_merge"])
 
-            unmatched = merged[merged["_merge"] == "left_only"].drop(columns=["_merge"])
-            matched = merged[merged["_merge"] == "both"].drop(columns=["_merge"])
+                if unmatched.empty:
+                    st.success("🎉 The allocated seats are successfully completed!")
+                    st.balloons()
+                else:
+                    total = len(assign_df)
+                    st.error("❌ Some records did not match.")
+                    st.write(f"Matched: **{len(matched)}/{total}**  ({round(len(matched)/total*100, 2)}%)")
+                    st.dataframe(matched[REQUIRED])
+                    st.write(f"Unmatched: **{len(unmatched)}/{total}**  ({round(len(unmatched)/total*100, 2)}%)")
+                    st.dataframe(unmatched[REQUIRED])
 
-            if unmatched.empty:
-                st.success("🎉 The allocated seats are successfully completed!")
-                st.balloons()
+                # --- Save submissions in group folder ---
+                group_folder = os.path.join(os.path.dirname(current_dir), "data", "submissions", group_name.replace(" ", "_"))
+                os.makedirs(group_folder, exist_ok=True)
+
+                # Save assignment file
+                csv_path = os.path.join(group_folder, f"{group_name}_submission.csv")
+                assign_df.to_csv(csv_path, index=False)
+                st.info(f"📂 Assignment CSV saved to `{csv_path}`")
+
+                # Save Python file if uploaded
+                if py_file:
+                    py_path = os.path.join(group_folder, f"{group_name}_code.py")
+                    with open(py_path, "w", encoding="utf-8") as f:
+                        f.write(code_content)
+                    st.info(f"📂 Python file saved to `{py_path}`")
 
                 # Save log
                 validation_log = os.path.join(os.path.dirname(current_dir), 'data', 'validation_log.csv')
@@ -161,23 +181,7 @@ if page == "Validate Allocation":
                 else:
                     log_entry.to_csv(validation_log, mode="w", header=True, index=False)
 
-                st.info(f"📌 Log saved: {group_name} at {timestamp}")
+                st.success(f"📌 Log saved for {group_name} at {timestamp}")
 
-                # Show validated output in expected column order
-                st.subheader("📊 Validated Records")
-                st.dataframe(matched[REQUIRED])
-
-            else:
-                total = len(assign_df)
-                st.error("❌ Some records did not match.")
-                st.write(f"Matched: **{len(matched)}/{total}**  ({round(len(matched)/total*100, 2)}%)")
-                st.dataframe(matched[REQUIRED])
-                st.write(f"Unmatched: **{len(unmatched)}/{total}**  ({round(len(unmatched)/total*100, 2)}%)")
-                st.dataframe(unmatched[REQUIRED])
-
-        except Exception as e:
-            st.error(f"⚠️ Error while processing file: {e}")
-
-    elif group_name == "Select Group" and assignment_file:
-        st.warning("⚠️ Please select a group before uploading file.")
-
+            except Exception as e:
+                st.error(f"⚠️ Error while processing file: {e}")
